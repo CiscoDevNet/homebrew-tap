@@ -1,58 +1,69 @@
-**AGENTS.md is a simple, open format for guiding AI agents that works with your repository.**
+# AGENTS.md
 
-> Edit the following template to provide users with a better experience when working with coding agents (VS Code, GitHub Copilot, Cursor, Codex, Gemini CLI, etc.).
+Guidance for AI coding agents working in `CiscoDevNet/homebrew-tap`.
 
-Provide the agent with information on which documentation and/or OpenAPI spec document to use.  
-For example, you can paste a direct link to the latest OpenAPI spec. 
-Direct link for Cisco Secure Access Authorization API:
-https://pubhub.devnetcloud.com/media/cloud-security-apis-in-eft/docs/secure-access/reference/auth/cisco_secure_access_token_authorization_api_2_0_0.yaml 
-
-Add information about the MCP servers needed for the project.
-
-You can add a link to the Cisco DevNet sandbox needed to work with the project. 
-Choose the direct link from the list here: https://devnetsandbox.cisco.com/DevNet
-
-Additionally, you can provide information about the version and link to the SDK, Infrastructure as Code provider/module, etc., which is recommended for use by coding Agents.
-
-Example of AGENTS.md file at Cisco DevNet GitHub org: [https://github.com/CiscoDevNet/python_code_samples_network/blob/master/AGENTS.md](https://github.com/CiscoDevNet/python_code_samples_network/blob/master/AGENTS.md)
-
-Example of AGENTS.md file at The Apache Software Foundation org: [https://github.com/apache/airflow/blob/main/AGENTS.md](https://github.com/apache/airflow/blob/main/AGENTS.md)
-
-**How to test AGENTS.md?**
-* You can test it with your favorite coding agents (VS Code, GitHub Copilot, Cursor, Codex, Gemini CLI, etc.).
-* Clone the repository containing the updated AGENTS.md and request guidance, such as: `How do I run this project with the [specified parameters]?`
-
-# Template:
+This repository is a [Homebrew](https://brew.sh) tap: a collection of formulae
+(`Formula/*.rb`) that let users install CiscoDevNet command-line tools with `brew`. The
+qualified tap name is `CiscoDevNet/tap`, so formulae install as
+`CiscoDevNet/tap/<name>`. There is no application source code here — the "source" is the
+Ruby formula files and the CI workflow.
 
 ## Dev environment tips
 
-- **Python version**: Use Python 3.9+.
-- **Virtual env (recommended)**:
+- **Homebrew required**: install from https://brew.sh and ensure `brew` is on `PATH`.
+- **Register this working copy as a tap** so `brew` can operate on the local files:
   ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  python -m pip install -U pip
+  TAPS="$(brew --repository)/Library/Taps/ciscodevnet"
+  mkdir -p "$TAPS"
+  ln -sfn "$PWD" "$TAPS/homebrew-tap"
   ```
-
-### Quick run examples
-
+- **Formula style**: every formula uses `Language::Python::Virtualenv` with
+  `virtualenv_install_with_resources`, targets `depends_on "python@3.12"`, and declares a
+  SPDX `license`. Do not use PyInstaller or other prebuilt-binary formulae here.
+- **Never hand-write dependency `resource` blocks or their hashes.** Generate them:
+  ```bash
+  brew update-python-resources CiscoDevNet/tap/<name>
+  ```
 
 ## Testing instructions
 
-- **MCP server links**
+Run these locally before opening a PR; all must pass:
 
-- **Test the code with the Cisco DevNet sandbox**
-  
-  Visit https://devnetsandbox.cisco.com/DevNet to book a related sandbox.
-  
-- **Latest Cisco API documentation**:
-  
-  https://developer.cisco.com/docs/
+```bash
+brew style   CiscoDevNet/tap/<name>
+brew audit --new --formula CiscoDevNet/tap/<name>
+brew install --build-from-source CiscoDevNet/tap/<name>
+brew test    CiscoDevNet/tap/<name>
+```
+
+- CI (`.github/workflows/tests.yml`) runs `brew test-bot` on macOS and Ubuntu for every PR.
+- On Homebrew 6.0+, set `HOMEBREW_NO_REQUIRE_TAP_TRUST=1` when driving the local tap in
+  non-interactive contexts.
 
 ## PR instructions
 
-- **Security**: Do not commit real credentials or tokens. Use placeholders and document required env vars or files.
+- **Security**: never commit real credentials or tokens. Formulae reference only public
+  PyPI artifacts.
+- **One formula per change** where practical; keep resource-block updates generated, not
+  edited by hand.
+- **Version bumps are automated.** Each tool's source repo opens a bump PR against this
+  tap on release (for `sccfm-cli`, from `CiscoDevNet/sccfm-devkit`). Do not add a bump
+  workflow to this repo.
 
 ## Contribution conventions
 
-- **Backward compatibility**: Do not change existing sample behavior unless clearly improving or fixing a bug; document changes.
+- **Source file headers**: prepend to every formula and workflow file:
+  ```
+  # Copyright 2026 Cisco Systems, Inc. and its affiliates
+  #
+  # SPDX-License-Identifier: Apache-2.0
+  ```
+- **Headings**: sentence case.
+- **Backward compatibility**: renaming a formula changes its install name and breaks
+  existing users — avoid unless clearly intended and documented.
+
+## References
+
+- Homebrew Formula Cookbook: https://docs.brew.sh/Formula-Cookbook
+- Python for Formula Authors: https://docs.brew.sh/Python-for-Formula-Authors
+- Cisco DevNet: https://developer.cisco.com/
