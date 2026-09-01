@@ -7,8 +7,8 @@ class SccfmCli < Formula
 
   desc "Cisco SCC Firewall Manager CLI and Python automation library"
   homepage "https://github.com/CiscoDevNet/sccfm-devkit"
-  url "https://files.pythonhosted.org/packages/da/6c/e8ef50c4d290644d28364cd709c226bac991566e2f3ea471b0b3168ffb8d/cisco_sccfm_devkit-0.39.3.tar.gz"
-  sha256 "d05042018c26622efad9de5c586fe80c4e9f96a302f7b0afb18d05a9aa45da87"
+  url "https://files.pythonhosted.org/packages/58/d7/468f273f4642fb9e177b7518fe9a9caec07fa6166d75efeaa788c53e559f/cisco_sccfm_devkit-0.40.0.tar.gz"
+  sha256 "7649b03ac3f331887852bc62600393f7444c7fff9cd077638e56d57eed9e81df"
   license "Apache-2.0"
 
   depends_on "pkgconf" => :build
